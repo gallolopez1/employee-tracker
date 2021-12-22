@@ -1,7 +1,6 @@
 # Employee Tracker
 
 ## Links
-* 🌎 [Heroku Page](#)
 * 💾 [Repo](https://github.com/gallolopez1/employee-tracker)
 
 ## Instructions
