@@ -1,12 +1,12 @@
-require('dotenv').config();
 // Connect to database
-const db = require('db')
-db.connect({
-  host: 'localhost',   
-  name: process.env.DB_NAME,   
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS
-})
-console.log('Connected to the tracker database.');
+const mysql = require('mysql2');
+require('dotenv').config();
+
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,   
+  user: process.env.DB_USER,
+  password: process.env.DB_PW, 
+  database: process.env.DB_NAME
+});
 
 module.exports = db;
