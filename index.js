@@ -31,7 +31,9 @@ const options = () => {
           promptRoles();
           break;
         case "View Role":
-          viewRoles();
+            viewRoles().then(data => {
+                console.table(data);
+              });
           break;
         case "Add Employee":
           promptEmployee();
@@ -119,6 +121,17 @@ const promptRoles = () => {
   ]);
 };
 
+// view all roles
+const viewRoles = () => {
+    const sql = `SELECT roles.id, roles.title, roles.salary, departments.name
+    FROM roles
+    LEFT JOIN departments ON roles.department_id = departments.id`;
+    var result = db.promise().query(sql).then(([rows, columns]) => {
+        return rows;
+    });
+    return result;
+}
+
 // prompt information for employees
 const promptEmployee = (employeeData) => {
   console.log(`
@@ -184,5 +197,18 @@ const promptEmployee = (employeeData) => {
     },
   ]);
 };
+
+// view all empoloyees
+const viewRoles = () => {
+    const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.name, roles.salary, 
+    (SELECT CONCAT(x.first_name, " ", x.last_name) FROM employees x WHERE x.id = employees.manager_id) AS 'Manager'
+    FROM employees
+    LEFT JOIN roles ON roles.id = employees.role_id
+    LEFT JOIN departments ON roles.department_id = departments.id`;
+    var result = db.promise().query(sql).then(([rows, columns]) => {
+        return rows;
+    });
+    return result;
+}
 
 options();
