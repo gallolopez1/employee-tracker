@@ -25,6 +25,7 @@ const options = () => {
         case "View Department":
           viewDepartments().then(data => {
             console.table(data);
+            return options();
           });
           break;
         case "Add Role":
@@ -33,13 +34,17 @@ const options = () => {
         case "View Role":
             viewRoles().then(data => {
                 console.table(data);
+                return options();
               });
           break;
         case "Add Employee":
-          promptEmployee();
+          promptEmployees();
           break;
         case "View Employee":
-          viewEmployee();
+          viewEmployees().then(data => {
+              console.table(data);
+              return options();
+          });
           break;
         case "Update Employee":
           promptUpdateEmployee();
@@ -50,7 +55,7 @@ const options = () => {
 
 // prompt information for department
 const promptDepartments = () => {
-  return inquirer.prompt([
+  return inquirer.prompt(
     {
       type: "input",
       name: "departmentName",
@@ -62,9 +67,21 @@ const promptDepartments = () => {
           console.log("Please enter a department name!");
           return false;
         }
-      },
-    },
-  ]);
+      }
+    }
+  ).then(answersDept => {
+      const sql = `INSERT INTO departments (name) VALUES (?)`
+      const params = [answersDept.departmentName];
+      db.query(sql,params, (err) => {
+          if (err) {
+               console.log(`Failed to insert ${answersDept.departmentName} into the database.`);
+               return options();
+          } else {
+               console.log(`Added ${answersDept.departmentName} to the Database!`);
+               return options();
+          }
+      });
+  });
 };
 
 // view all departments
@@ -133,7 +150,7 @@ const viewRoles = () => {
 }
 
 // prompt information for employees
-const promptEmployee = (employeeData) => {
+const promptEmployees = (employeeData) => {
   console.log(`
   =================
   Add a New Employee
@@ -199,7 +216,7 @@ const promptEmployee = (employeeData) => {
 };
 
 // view all empoloyees
-const viewRoles = () => {
+const viewEmployees = () => {
     const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.name, roles.salary, 
     (SELECT CONCAT(x.first_name, " ", x.last_name) FROM employees x WHERE x.id = employees.manager_id) AS 'Manager'
     FROM employees
