@@ -66,7 +66,7 @@ router.post('/department', ({ body }, res) => {
     }
     const sql = `INSERT INTO departments (name)
   VALUES (?,?,?)`;
-    const params = [name];
+    const params = [body.name];
 
     db.query(sql, params, (err, result) => {
         if (err) {
@@ -97,7 +97,7 @@ router.put('/department/:id', (req, res) => {
             // check if a record was found
         } else if (!result.affectedRows) {
             res.json({
-                message: 'department not found'
+                message: 'Department not found'
             });
         } else {
             res.json({
