@@ -12,11 +12,13 @@ const options = () => {
       choices: [
         "Add Department",
         "View Departments",
+        "View Department Budget",
         "Add Role",
         "View Roles",
         "Add Employee",
         "View Employees",
         "Update Employees",
+        "Update Employee's Manager",
       ],
     })
     .then((answer) => {
@@ -26,6 +28,12 @@ const options = () => {
           break;
         case "View Departments":
           viewDepartments().then((data) => {
+            console.table(data);
+            return options();
+          });
+          break;
+        case "View Department Budget":
+          viewDepartmentBudget().then((data) => {
             console.table(data);
             return options();
           });
@@ -50,6 +58,9 @@ const options = () => {
           break;
         case "Update Employees":
           updateEmployee();
+          break;
+        case "Update Employee's Manager":
+          updateEmployeeManager();
           break;
       }
     });
@@ -98,6 +109,22 @@ const promptDepartments = () => {
 // view all departments
 const viewDepartments = () => {
   const sql = `SELECT * FROM departments`;
+  var result = db
+    .promise()
+    .query(sql)
+    .then(([rows, columns]) => {
+      return rows;
+    });
+  return result;
+};
+
+// view department budget
+const viewDepartmentBudget = () => {
+  const sql = `SELECT departments.name AS 'Department', SUM(roles.salary) AS 'Total Budget'
+  from employees
+  LEFT JOIN roles on employees.role_id = roles.id
+  LEFT JOIN departments on roles.department_id = departments.id
+  GROUP BY departments.name`;
   var result = db
     .promise()
     .query(sql)
@@ -288,76 +315,6 @@ const promptEmployees = () => {
     });
 };
 
-// Update Employee
-// Prompt question to update empoloyee
-
-const updateEmployee = () => {
-  let allRole = [];
-  let allEmployees = [];
-  viewRoles().then((data) => {
-    data.forEach((roles) => {
-      let newObj = {
-        id: roles.id,
-        name: roles.title,
-      };
-      allRole.push(newObj);
-    });
-  });
-  viewEmployees().then((data) => {
-    data.forEach((employee) => {
-      let newObj = {
-        id: employee.id,
-        name: employee.first_name + " " + employee.last_name,
-      };
-      allEmployees.push(newObj);
-    });
-  }).then( () => {
-    console.log(`
-    ==================
-    Update an Employee
-    ==================`);
-  return inquirer
-    .prompt([
-      {
-        type: "rawlist",
-        name: "employee",
-        message: "Which employee would you like to update? (Required)",
-        choices: allEmployees,
-      },
-      {
-        type: "rawlist",
-        name: "role_id",
-        message: "Which employee's role would you like to update? (Required)",
-        choices: allRole,
-      },
-    ])
-    .then((update) => {
-      let employeeID = allEmployees.find((manager) => {
-        if (manager.name === update.employee) {
-          return manager;
-        }
-      }).id;
-      let roleID = allRole.find((role) => {
-        if (role.name === update.role_id) {
-          return role;
-        }
-      }).id;
-      const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
-      const params = [roleID, employeeID];
-      db.query(sql, params, (err) => {
-        if (err) {
-          console.log("Failed to update employee role.");
-          return options();
-        } else {
-          console.log("Updated employee role!");
-          return options();
-        }
-      });
-    });
-  })
- 
-};
-
 // view all empoloyees
 const viewEmployees = () => {
   const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.name, roles.salary, 
@@ -372,6 +329,132 @@ const viewEmployees = () => {
       return rows;
     });
   return result;
+};
+
+// Update Employee
+// Prompt question to update empoloyee
+const updateEmployee = () => {
+  let allRole = [];
+  let allEmployees = [];
+  viewRoles().then((data) => {
+    data.forEach((roles) => {
+      let newObj = {
+        id: roles.id,
+        name: roles.title,
+      };
+      allRole.push(newObj);
+    });
+  });
+  viewEmployees()
+    .then((data) => {
+      data.forEach((employee) => {
+        let newObj = {
+          id: employee.id,
+          name: employee.first_name + " " + employee.last_name,
+        };
+        allEmployees.push(newObj);
+      });
+    })
+    .then(() => {
+      console.log(`
+    ==================
+    Update an Employee
+    ==================`);
+      return inquirer
+        .prompt([
+          {
+            type: "rawlist",
+            name: "employee",
+            message: "Which employee would you like to update? (Required)",
+            choices: allEmployees,
+          },
+          {
+            type: "rawlist",
+            name: "role_id",
+            message:
+              "Which employee's role would you like to update? (Required)",
+            choices: allRole,
+          },
+        ])
+        .then((update) => {
+          let employeeID = allEmployees.find((manager) => {
+            if (manager.name === update.employee) {
+              return manager;
+            }
+          }).id;
+          let roleID = allRole.find((role) => {
+            if (role.name === update.role_id) {
+              return role;
+            }
+          }).id;
+          const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
+          const params = [roleID, employeeID];
+          db.query(sql, params, (err) => {
+            if (err) {
+              console.log("Failed to update employee role.");
+              return options();
+            } else {
+              console.log("Updated employee role!");
+              return options();
+            }
+          });
+        });
+    });
+};
+
+// Update employee manager
+const updateEmployeeManager = () => {
+  let allEmployees = [];
+  viewEmployees()
+    .then((data) => {
+      data.forEach((employee) => {
+        let newObj = {
+          id: employee.id,
+          name: employee.first_name + " " + employee.last_name,
+        };
+        allEmployees.push(newObj);
+      });
+    })
+    .then(() => {
+      return inquirer
+        .prompt([
+          {
+            type: "rawlist",
+            name: "employee",
+            message: "Which employee do you want to update? (Required)",
+            choices: allEmployees,
+          },
+          {
+            type: "rawlist",
+            name: "manager",
+            message: "Select a manager for this employee. (Required)",
+            choices: allEmployees,
+          },
+        ])
+        .then((answer) => {
+          let employeeID = allEmployees.find(id => {
+            if (id.name === answer.employee) {
+              return id;
+            }
+          }).id;
+          let managerID = allEmployees.find(id => {
+            if (id.name === answer.manager) {
+              return id;
+            }
+          }).id;
+          const sql = `UPDATE employees SET manager_id = ? WHERE id = ?`;
+          const params = [managerID, employeeID];
+          db.query(sql, params, (err) => {
+            if (err) {
+              console.log("Failed to update employee's manager.");
+              return options();
+            } else {
+              console.log("Updated employee's manager!");
+              return options();
+            }
+          });
+        });
+    });
 };
 
 options();
