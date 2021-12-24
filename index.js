@@ -24,7 +24,7 @@ const options = () => {
         case "Add Department":
           promptDepartments();
           break;
-        case "View Department":
+        case "View Departments":
           viewDepartments().then((data) => {
             console.table(data);
             return options();
@@ -33,7 +33,7 @@ const options = () => {
         case "Add Role":
           promptRoles();
           break;
-        case "View Role":
+        case "View Roles":
           viewRoles().then((data) => {
             console.table(data);
             return options();
@@ -42,14 +42,14 @@ const options = () => {
         case "Add Employee":
           promptEmployees();
           break;
-        case "View Employee":
+        case "View Employees":
           viewEmployees().then((data) => {
             console.table(data);
             return options();
           });
           break;
         case "Update Employee":
-          promptUpdateEmployee();
+          updateEmployee();
           break;
       }
     });
@@ -229,8 +229,8 @@ const promptEmployees = (employeeData) => {
         type: "input",
         name: "employeeRole",
         message: "What is the employee's role? (Required)",
-        validate: (employeeLastNameInput) => {
-          if (employeeLastNameInput) {
+        validate: (employeeRoleInput) => {
+          if (employeeRoleInput) {
             return true;
           } else {
             console.log("Please enter a role!");
@@ -253,7 +253,7 @@ const promptEmployees = (employeeData) => {
       }, // pass the new values into the database
     ])
     .then((answersEmployee) => {
-      const sql = `INSERT INTO roles (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`;
+      const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`;
       const params = [
         answersEmployee.employeeFirstName,
         answersEmployee.employeeLastName,
@@ -273,6 +273,62 @@ const promptEmployees = (employeeData) => {
       });
     });
 };
+
+// Update Employee
+// Prompt question to update empoloyee
+
+const updateEmployee = () => {
+    console.log(`
+    ==================
+    Update an Employee
+    ==================`);
+    return inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "employee",
+          message: "Which employee would you like to update? (Required)",
+          validate: (employeeInput) => {
+            if (employeeInput) {
+              return true;
+            } else {
+              console.log("Please select an employee!");
+              return false;
+            }
+          },
+        },
+        {
+          type: "input",
+          name: "role_id",
+          message: "Which employee's role would you like to update? (Required)",
+          validate: (role_idInput) => {
+            if (role_idInput) {
+              return true;
+            } else {
+              console.log("Please enter a role!");
+              return false;
+            }
+          },
+        },
+     ]).then((update) => {
+      const sql = `UPDATE employees SET role_id = ? WHERE id = ?`
+      const params = [
+        update.role_id,
+        update.employee_id,
+      ];
+      db.query(sql, params, (err) => {
+        if (err) {
+          console.log(
+            'Failed to update employee role.'
+          );
+          return options();
+        } else {
+          console.log('Updated employee role!');
+          return options();
+        }
+      });
+     })
+}
 
 // view all empoloyees
 const viewEmployees = () => {

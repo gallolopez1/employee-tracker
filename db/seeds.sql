@@ -22,4 +22,4 @@ VALUES
   ('Kumal', 'Singh', 4, NULL),
   ('Malia', 'Brown', 5, 4),
   ('Sarah', 'Lourd', 6, NULL),
-  ('Tom', 'Allen', 6, 6);
+  ('Tom', 'Allen', 7, 6);
