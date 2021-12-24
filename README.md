@@ -1,4 +1,4 @@
-# Employee Tracker
+# SQL Challenge 12: Employee Tracker
 
 ## Links
 * 💾 [Repo](https://github.com/gallolopez1/employee-tracker)
@@ -6,7 +6,10 @@
 ## Instructions
 Build a command-line application from scratch to manage a company's employee database, using Node.js, Inquirer, and MySQL.
 
-## <u>Employee Tracker App Preview:</u>
+### App Usage
+[Recording Link](https://watch.screencastify.com/v/7AaKVAKhFQKKP6DMRh1R)
+
+![App Usage Recording](./assets/employee-tracker.gif)
 
 ## User Story
 `AS A business owner`
@@ -55,3 +58,14 @@ THEN I am prompted to select an employee to update and their new role and this i
 * Node.js
 * Inquirer
 * MySQL
+
+## References:
+https://nodejs.org/api/fs.html
+
+https://www.npmjs.com/package/inquirer
+
+https://www.npmjs.com/package/mysql2
+
+https://www.npmjs.com/package/console.table
+
+https://www.npmjs.com/package/dotenv
